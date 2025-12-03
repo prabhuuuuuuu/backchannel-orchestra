@@ -19,45 +19,39 @@ export function useWebSocket(options: UseWebSocketOptions) {
   const [error, setError] = useState<Error | null>(null);
 
   const connect = useCallback(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
+  const ws = new WebSocket(url);
+  ws.binaryType = "arraybuffer";
 
-    const ws = new WebSocket(url);
-    ws.binaryType = "arraybuffer"; // IMPORTANT
+  ws.onopen = () => {
+    setIsConnected(true);
+    setError(null);
+    options.onOpen?.();
+  };
 
-    ws.onopen = () => {
-      setIsConnected(true);
-      setError(null);
-      options.onOpen?.();
-    };
+  ws.onmessage = (evt) => {
+    if (typeof evt.data === "string") {
+      try {
+        options.onFeedback?.(JSON.parse(evt.data));
+      } catch {}
+    } else {
+      options.onAudio?.(evt.data);
+    }
+  };
 
-    ws.onmessage = (evt) => {
-      if (typeof evt.data === "string") {
-        // JSON feedback
-        try {
-          const json = JSON.parse(evt.data);
-          options.onFeedback?.(json);
-        } catch (err) {
-          console.error("WS JSON parse error:", err);
-        }
-      } else {
-        // Binary audio
-        options.onAudio?.(evt.data);
-      }
-    };
+  ws.onerror = () => {
+    const err = new Error("WebSocket error");
+    setError(err);
+    options.onError?.(err);
+  };
 
-    ws.onerror = () => {
-      const err = new Error("WebSocket error");
-      setError(err);
-      options.onError?.(err);
-    };
+  ws.onclose = () => {
+    setIsConnected(false);
+    options.onClose?.();
+  };
 
-    ws.onclose = () => {
-      setIsConnected(false);
-      options.onClose?.();
-    };
+  wsRef.current = ws;
+}, [url]);   // 🔥 REMOVE "options"
 
-    wsRef.current = ws;
-  }, [url, options]);
 
   const disconnect = useCallback(() => {
     wsRef.current?.close();
@@ -71,11 +65,18 @@ export function useWebSocket(options: UseWebSocketOptions) {
   }, [autoConnect]);
 
   /** SEND RAW PCM BYTES */
-  const sendAudio = useCallback((audioBuffer: ArrayBuffer) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(audioBuffer); // RAW BINARY
+  const sendAudio = useCallback(
+  (audioBuffer: ArrayBuffer) => {
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      console.log("Sending chunk:", audioBuffer.byteLength, "bytes");
+      const view = new Int16Array(audioBuffer);
+      console.log("Chunk preview:", view.slice(0, 10));
+      ws.send(audioBuffer);
     }
-  }, []);
+  },
+  []  // allowed since we read .current each call
+);
 
   return {
     isConnected,

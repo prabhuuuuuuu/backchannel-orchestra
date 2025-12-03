@@ -74,7 +74,7 @@ class ASRService:
             smart_format=True,
             interim_results=True,
             encoding="linear16",  # PCM 16‑bit
-            sample_rate=16000,    # matches RATE in test_client.py
+            sample_rate=48000,    # matches RATE in test_client.py
             channels=1,           # mono
         )
 
