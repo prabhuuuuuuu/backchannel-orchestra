@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+websockets
+python-dotenv
+aiohttp
+assemblyai>=0.20.0  # Swapped from deepgram-sdk
+requests
+pydantic
+textblob
+pyaudio

@@ -1,0 +1,18 @@
+# Security: NEVER upload your API keys
+.env
+.env.local
+
+# Python: Ignore virtual environments and cache
+__pycache__/
+*.py[cod]
+murf/
+.murf/
+env/
+
+# IDEs: Ignore editor settings (optional but cleaner)
+.vscode/
+.idea/
+
+# OS: Ignore system files
+.DS_Store
+Thumbs.db
