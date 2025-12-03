@@ -3,7 +3,7 @@ uvicorn
 websockets
 python-dotenv
 aiohttp
-assemblyai>=0.20.0  # Swapped from deepgram-sdk
+deepgram-sdk==3.0.0 
 requests
 pydantic
 textblob
