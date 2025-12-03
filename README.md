@@ -113,9 +113,8 @@ backchannel-orchestra/
 - Hardware integration.
 
 👥 Team
-
-Mr. Pranav Prashant Shewale - AI Engineer (ASR/TTS/logic)
-Mr. Shourya Agrawal - Full Stack Engineer (UI/streaming)
+- Mr. Pranav Prashant Shewale - AI Engineer (ASR/TTS/logic)
+- Mr. Shourya Agrawal - Full Stack Engineer (UI/streaming)
 
 ## 📄 License
 MIT – See [LICENSE](LICENSE).
