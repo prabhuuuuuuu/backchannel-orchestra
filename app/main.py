@@ -43,6 +43,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
     # This is called by ASRService every time Deepgram has text
     async def on_transcript(text: str, is_final: bool, sentiment):
+
+        await websocket.send_json({
+            "type": "transcript",
+            "text": text,
+            "is_final": is_final,
+            "sentiment": sentiment,
+        })
         # Voice commands to switch mode
         lower = text.lower()
         if "switch to heckler" in lower:

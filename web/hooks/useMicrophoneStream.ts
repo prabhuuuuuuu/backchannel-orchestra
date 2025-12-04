@@ -53,7 +53,7 @@ export function useMicrophoneStream(options: UseMicrophoneStreamOptions = {}) {
       await audioContextRef.current.resume();
 
       const audioContext = audioContextRef.current;
-      console.log("🎤 Sample Rate:", audioContext.sampleRate);
+      // console.log("🎤 Sample Rate:", audioContext.sampleRate);
 
       const source = audioContext.createMediaStreamSource(stream);
       sourceRef.current = source;
@@ -78,9 +78,9 @@ export function useMicrophoneStream(options: UseMicrophoneStreamOptions = {}) {
   const input = event.inputBuffer.getChannelData(0);
   const pcm16 = float32ToPCM16(input);
   
-  console.log("🎤 About to call onAudioChunk");
+  // console.log("🎤 About to call onAudioChunk");
   options.onAudioChunk?.(pcm16.buffer, Date.now());
-  console.log("✅ onAudioChunk called");
+  // console.log("✅ onAudioChunk called");
 };
 
       setIsRecording(true);
