@@ -40,6 +40,7 @@ class ASRService:
 
         def on_transcript(conn, result, **kwargs):
             """Called by Deepgram when a transcript chunk arrives."""
+            print("Deepgram raw result received")
             try:
                 if not result.channel.alternatives:
                     return
@@ -73,10 +74,11 @@ class ASRService:
             language="en-US",
             smart_format=True,
             interim_results=True,
-            encoding="linear16",  # PCM 16‑bit
-            sample_rate=48000,    # matches RATE in test_client.py
-            channels=1,           # mono
+            encoding="linear16",
+            sample_rate=16000,
+            channels=1,
         )
+
 
         await self.connection.start(options)
         print("✓ Deepgram Live ASR connected")

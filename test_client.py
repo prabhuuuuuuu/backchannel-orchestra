@@ -43,6 +43,7 @@ async def run_test(uri):
                 try:
                     while True:
                         data = mic_stream.read(CHUNK, exception_on_overflow=False)
+                        print("Mic chunk size:", len(data))
                         await websocket.send(data)
                         await asyncio.sleep(0.1)  # Small delay to prevent flooding
                 except Exception as e:

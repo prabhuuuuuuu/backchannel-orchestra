@@ -104,6 +104,7 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             # Receive raw audio from test_client / frontend
             data = await websocket.receive_bytes()
+            print("Server got audio chunk:", len(data))
             await asr_service.send_audio(data)
     except WebSocketDisconnect:
         print("❌ Client disconnected")
