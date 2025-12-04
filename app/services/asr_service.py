@@ -1,6 +1,7 @@
 # app/services/asr_service.py
 
 import os
+import asyncio
 from typing import Optional
 
 from deepgram import (
@@ -16,9 +17,9 @@ load_dotenv()
 
 class ASRService:
     """
-    Deepgram-based streaming ASR service.
-    - Streams 16kHz mono PCM from the WebSocket client.
-    - Calls the provided async callback(text: str, is_final: bool) on each transcript.
+    Deepgram-based streaming ASR.
+    - Expects 16 kHz, mono, 16-bit PCM audio from client.
+    - Calls async callback(text: str, is_final: bool) for every non-empty transcript.
     """
 
     def __init__(self, callback):
@@ -34,18 +35,18 @@ class ASRService:
         Connect to Deepgram Live and start receiving transcripts.
         """
         config = DeepgramClientOptions(options={"keepalive": "true"})
-        deepgram = DeepgramClient(self.api_key, config)
+        dg = DeepgramClient(self.api_key, config)
 
-        # Create live connection
-        self.connection = deepgram.listen.asynclive.v("1")
+        self.connection = dg.listen.asynclive.v("1")
 
-        # Register event handler
-        self.connection.on(
-            LiveTranscriptionEvents.Transcript,
-            self._on_message,
-        )
+        # Wrapper to avoid "multiple values for argument 'result'"
+        def on_transcript(conn, result, **kwargs):
+            # Schedule processing in the running event loop
+            asyncio.create_task(self._handle_result(result))
 
-        # IMPORTANT: no sentiment flag here — only core ASR options
+        # Register the wrapper, NOT a bound method
+        self.connection.on(LiveTranscriptionEvents.Transcript, on_transcript)
+
         options = LiveOptions(
             model="nova-2",
             language="en-US",
@@ -59,36 +60,38 @@ class ASRService:
         await self.connection.start(options)
         print("✓ Deepgram Live ASR connected")
 
-    async def _on_message(self, result, **kwargs):
+    async def _handle_result(self, result):
         """
-        Handler for incoming Deepgram transcripts.
-        Extracts text and final flag, then calls self.callback.
+        Internal async handler used by on_transcript wrapper.
         """
-        if not result.channel.alternatives:
-            return
+        try:
+            if not result.channel.alternatives:
+                print("⚠ Deepgram: no alternatives in result")
+                return
 
-        alt = result.channel.alternatives[0]
-        sentence = alt.transcript
-        if not sentence:
-            return
+            alt = result.channel.alternatives[0]
+            text = alt.transcript or ""
+            is_final = bool(getattr(result, "is_final", False))
 
-        is_final = result.is_final
+            # Log what Deepgram actually sent
+            print(f"📝 Deepgram raw: '{text}' (final={is_final})")
 
-        print(f"📝 Heard: '{sentence}' (final={is_final})")
+            if text.strip():
+                await self.callback(text, is_final, None)  # Always pass None for sentiment
 
-        # Forward to main logic
-        await self.callback(sentence, is_final)
+        except Exception as e:
+            print(f"ASRService._handle_result error: {e}")
 
     async def send_audio(self, audio_chunk: bytes):
         """
-        Send raw audio bytes to Deepgram.
+        Send raw PCM audio to Deepgram.
         """
         if self.connection:
             await self.connection.send(audio_chunk)
 
     async def stop(self):
         """
-        Cleanly close the Deepgram connection.
+        Close Deepgram connection cleanly.
         """
         if self.connection:
             await self.connection.finish()

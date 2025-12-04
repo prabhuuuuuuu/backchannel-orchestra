@@ -81,7 +81,7 @@ class BackchannelLogic:
             return "negative"
         return "neutral"
 
-    def decide_reaction(self, transcript: str, is_final: bool):
+    def decide_reaction(self, transcript: str, is_final: bool, sentiment=None):
         """
         Returns list of reaction dicts:
         [{ "text": "...", "voice_id": "...", "style": {...} }, ...]
@@ -111,33 +111,38 @@ class BackchannelLogic:
         else:
             voice_id = Config.VOICES["primary_coach"]
 
-        style = Config.MODES.get(self.current_mode, Config.MODES["coach"])["style"]
+        # ✅ FIX: Get the FULL style dict, not just the "style" string
+        style_config = Config.MODES.get(self.current_mode, Config.MODES["coach"])
 
         reactions = [
             {
                 "text": chosen_text,
                 "voice_id": voice_id,
-                "style": style,
+                "style": style_config,  # ← Now passing the full dict
             }
         ]
 
-        # Optional “crowd” layer for strong positive in coach mode
+        # Optional "crowd" layer for strong positive in coach mode
         if sentiment == "positive" and self.current_mode == "coach":
             crowd_voice = random.choice(
                 [Config.VOICES["crowd_member_1"], Config.VOICES["crowd_member_2"]]
             )
             crowd_text = random.choice(["yeah!", "woo!", "nice!", "right on!"])
-            reactions.append(
-                {
-                    "text": crowd_text,
-                    "voice_id": crowd_voice,
-                    "style": {"pitch": 5, "rate": 10},
+            reactions.append({
+                "text": crowd_text,  # ← Fixed: was using chosen_text instead of crowd_text
+                "voice_id": crowd_voice,  # ← Fixed: was using voice_id instead of crowd_voice
+                "style": {
+                    "style": "Conversational",
+                    "rate": 10,      # ← Faster for crowd excitement
+                    "pitch": 5,      # ← Higher pitch for energy
                 }
-            )
+            })
 
         self.last_trigger_time = now
         print(
             f"[{self.current_mode.upper()}] Triggered: '{chosen_text}' "
             f"(Sentiment: {sentiment})"
         )
+
         return reactions
+

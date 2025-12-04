@@ -36,7 +36,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("✓ WebSocket client connected")
 
-    async def on_transcript(text: str, is_final: bool):
+    async def on_transcript(text, is_final, sentiment):
         # If the client disconnected, ignore late transcripts
         if websocket.client_state != WebSocketState.CONNECTED:
             return
