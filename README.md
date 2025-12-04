@@ -1,127 +1,72 @@
-# 🎭 Backchannel Orchestra
+# Backchannel Orchestra
 
-> Transform solo presentation practice into an interactive experience with AI-powered audience responses
+> **An AI-powered live audience** that reacts in real-time while you practice presentations — cheers, mm-hmms, laughs, or even heckles you!
 
 [![murf-ai](https://img.shields.io/badge/Powered%20by-Murf%20Falcon-blue)](https://murf.ai/falcon)
-[![AssemblyAI](https://img.shields.io/badge/Speech-AssemblyAI-green)](https://www.assemblyai.com/)
+[![Deepgram](https://img.shields.io/badge/ASR-Deepgram_Nova--2-green)](https://deepgram.com/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-teal)](https://fastapi.tiangolo.com/)
 
-<!-- Demo Video Placeholder: Insert demo video here -->
-<!-- ![Demo Video](demo.mp4) or [Watch Demo](demo-link) -->
+[Watch Demo Video](#) | [Live Web App](#) (coming soon)
 
-A real-time AI audience system providing natural vocal backchannels for public speaking practice. Built for the Murf Voice Agent Hackathon using ultra-low latency speech synthesis.
+**Built using Murf Falcon – the consistently fastest TTS API.**
 
-## 🌟 Key Features
+## Key Features
 
-- **Real-Time Vocal Backchannels**: Instant responses ("mm-hmm", "go on", "wow!") triggered by speech patterns via Murf Falcon's 130ms TTS.
-- **Emotional Mirror**: Sentiment analysis from AssemblyAI adapts responses—energetic for positive, supportive for negative, neutral cues for neutral.
-- **Orchestra Mode**: Multi-voice crowd simulation with simultaneous reactions.
-- **Dynamic Personas**: Switch between Coach (supportive) and Heckler (challenging) modes with prosody controls.
+- **Real-time vocal backchannels** (mm-hmm, wow, go on) in <200ms  
+- **Emotional mirroring** – reacts to your sentiment (positive → cheers, nervous → supportive)  
+- **Orchestra Mode** – multiple voices respond together like a real crowd  
+- **Coach vs Heckler** – switch instantly with voice commands  
 
-## 🏗️ Architecture
+## Architecture
 
-<!-- System Architecture Image Placeholder: Insert architecture diagram here -->
-<!-- ![System Architecture](architecture.png) -->
+![Architecture](assets/ARCHITECTURE.png)
 
-**Core Components**:
-- **ASR Service**: Real-time speech-to-text with sentiment analysis.
-- **Logic Engine**: Rule-based triggering with cooldowns.
-- **TTS Service**: Multi-voice generation with prosody.
-- **WebSocket Handler**: Bidirectional audio streaming.
+**Core Stack**  
+Deepgram Nova-2 → FastAPI WebSocket → Logic Engine → Murf Falcon TTS
 
-## 🚀 Setup
+## Quick Start (30 seconds)
 
-### Prerequisites
-- Python 3.9+
-- Microphone-enabled device
-- API Keys: [Murf.ai](https://murf.ai/api), [AssemblyAI](https://www.assemblyai.com/)
-
-### Installation
-1. Clone: `git clone https://github.com/yourusername/backchannel-orchestra.git && cd backchannel-orchestra`
-2. Virtual env: `python -m venv venv` then activate (Windows: `venv\Scripts\activate`; Mac/Linux: `source venv/bin/activate`).
-3. Dependencies: `pip install -r requirements.txt`
-4. Config: `cp .env.example .env` and add keys (e.g., `MURF_API_KEY=your_key`).
-5. Run backend: `uvicorn app.main:app --reload`
-6. Open UI: http://localhost:8000
-
-## 🔐 API Keys
-Store in `.env` (gitignored). Use `.env.example` as template. Rotate keys regularly.
-
-## 📊 API Details
-
-### WebSocket: `ws://localhost:8000/ws/session`
-- **Input**: Raw PCM audio (16kHz, 16-bit, mono).
-- **Output**: MP3 chunks + JSON metadata.
-
-**Message Types**:
-- Binary: `<MP3_BYTES>`
-- JSON: `{"type": "feedback", "text": "mm-hmm", "mode": "coach", "sentiment": "positive"}`
-
-**Voice Commands**:
-- "Switch to coach": Supportive mode.
-- "Switch to heckler": Challenging mode.
-
-## 🧪 Testing
-Run `python test_client.py` to stream mic audio and log backchannels.
-
-## 📁 Structure
-```
-backchannel-orchestra/
-├── app/
-│   ├── main.py          # WebSocket handler
-│   ├── config.py        # Env config
-│   ├── services/
-│   │   ├── asr_service.py     # AssemblyAI
-│   │   ├── tts_service.py     # Murf Falcon
-│   │   └── logic_engine.py    # Decision logic
-│   └── utils/
-│       └── audio_utils.py     # Audio helpers
-├── static/
-│   ├── index.html       # Web UI
-│   └── client.js        # WebSocket client
-├── .env.example         # Key template
-├── requirements.txt     # Dependencies
-├── test_client.py       # Test script
-└── README.md
+```bash
+git clone https://github.com/yourusername/backchannel-orchestra.git
+cd backchannel-orchestra
+python -m venv venv && venv\Scripts\activate   # or source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # add DEEPGRAM_API_KEY + MURF_API_KEY
+uvicorn app.main:app --reload
+python test_client.py       # start speaking → hear instant reactions!
 ```
 
-## 🏆 Hackathon Compliance
-- Clear README, demo video, secure keys, tagged `murf-ai`.
+`.env` example:
+```
+DEEPGRAM_API_KEY=your_deepgram_key
+MURF_API_KEY=your_murf_key
+MURF_VOICE_ID=en-US-natalie
+```
 
-## 🛠️ Technologies
+## Voice Commands
 
-| Component   | Technology              |
-|-------------|-------------------------|
-| TTS         | Murf Falcon API         |
-| ASR         | AssemblyAI Streaming    |
-| Backend     | FastAPI + WebSockets    |
-| Frontend    | Vanilla JS + Web Audio  |
-| Sentiment   | TextBlob + AssemblyAI   |
-| Deployment  | Uvicorn ASGI            |
+| Say this               | Effect                              |
+|------------------------|-------------------------------------|
+| "Switch to coach"      | Supportive & encouraging            |
+| "Switch to heckler"    | Challenging & funny interruptions   |
 
-## 🎯 Use Cases
-- Presentation practice with simulated engagement.
-- Speech training for confidence.
-- Language learning via cues.
-- Interview prep under pressure.
+## Tech Stack
 
-## 🔮 Enhancements
-- Visual avatar with lip-sync.
-- Custom phrase training.
-- Analytics (pace, fillers, trends).
-- Multi-language.
-- Hardware integration.
+| Layer       | Technology             |
+|-------------|------------------------|
+| ASR         | Deepgram Nova-2        |
+| TTS         | Murf Falcon (multi-voice) |
+| Backend     | FastAPI + WebSockets   |
+| Sentiment   | TextBlob               |
+| Audio I/O   | PyAudio / Web Audio API|
 
-👥 Team
-- Mr. Pranav Prashant Shewale - AI Engineer (ASR/TTS/logic)
-- Mr. Shourya Agrawal - Full Stack Engineer (UI/streaming)
+## Team (2 members)
 
-## 📄 License
-MIT – See [LICENSE](LICENSE).
+- **Pranav Prashant Shewale** – AI Engineer (ASR/TTS, Logic Engine)  
+- **Shourya Agrawal** – Full-Stack Engineer (WebSocket, UI, Streaming)
 
-## 🙏 Acknowledgments
-- [Murf.ai](https://murf.ai) for Falcon TTS.
-- [AssemblyAI](https://www.assemblyai.com) for transcription.
-- Murf Hackathon organizers.
+**Murf Voice Agent Hackathon @ Techfest IIT Bombay**  
+`murf-ai` `voice-agent` `tts` `asr` `public-speaking` `fastapi` `deepgram`
 
-**Tags**: `murf-ai` `voice-agent` `tts` `asr` `hackathon` `public-speaking` `fastapi` `websockets`
+**Built with love for the Murf Voice Agent Hackathon**  
+Tag: `murf-ai`
