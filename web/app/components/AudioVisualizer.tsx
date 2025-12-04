@@ -34,7 +34,6 @@ export default function AudioVisualizer({
 
       // Get live waveform data
       analyserNode.getByteTimeDomainData(dataArray);
-      console.log(dataArray);
       
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);

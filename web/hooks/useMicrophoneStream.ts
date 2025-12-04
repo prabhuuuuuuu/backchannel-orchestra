@@ -14,9 +14,7 @@ interface UseMicrophoneStreamReturn {
   stopRecording: () => void;
 }
 
-export function useMicrophoneStream(
-  options: UseMicrophoneStreamOptions = {}
-): UseMicrophoneStreamReturn {
+export function useMicrophoneStream(options: UseMicrophoneStreamOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [analyserNode, setAnalyserNode] = useState<AnalyserNode>();
@@ -25,6 +23,12 @@ export function useMicrophoneStream(
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  /** FIX: tracking recording state without stale closures */
+  const recordingRef = useRef(false);
+  useEffect(() => {
+    recordingRef.current = isRecording;
+  }, [isRecording]);
 
   // Float32 → PCM16 converter
   const float32ToPCM16 = (float32: Float32Array) => {
@@ -49,6 +53,7 @@ export function useMicrophoneStream(
       await audioContextRef.current.resume();
 
       const audioContext = audioContextRef.current;
+      // console.log("🎤 Sample Rate:", audioContext.sampleRate);
 
       const source = audioContext.createMediaStreamSource(stream);
       sourceRef.current = source;
@@ -60,20 +65,23 @@ export function useMicrophoneStream(
       source.connect(analyser);
       setAnalyserNode(analyser);
 
-      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      const processor = audioContext.createScriptProcessor(1024, 1, 1);
       processorRef.current = processor;
 
+      /** Critical: connect processor so onaudioprocess fires */
       source.connect(processor);
       processor.connect(audioContext.destination);
 
       processor.onaudioprocess = (event) => {
-        if (!isRecording) return;
+  if (!recordingRef.current) return;
 
-        const input = event.inputBuffer.getChannelData(0);
-        const pcm16 = float32ToPCM16(input);
-
-        options.onAudioChunk?.(pcm16.buffer, Date.now()); // RAW PCM BYTES
-      };
+  const input = event.inputBuffer.getChannelData(0);
+  const pcm16 = float32ToPCM16(input);
+  
+  // console.log("🎤 About to call onAudioChunk");
+  options.onAudioChunk?.(pcm16.buffer, Date.now());
+  // console.log("✅ onAudioChunk called");
+};
 
       setIsRecording(true);
     } catch (err) {
@@ -87,7 +95,7 @@ export function useMicrophoneStream(
       setError(micErr);
       options.onError?.(micErr);
     }
-  }, [isRecording, options]);
+  }, [options]);
 
   const stopRecording = useCallback(() => {
     setIsRecording(false);
