@@ -1,7 +1,6 @@
 # app/services/asr_service.py
 
 import os
-import asyncio
 from typing import Optional
 
 from deepgram import (
@@ -19,22 +18,20 @@ class ASRService:
     """
     Deepgram-based streaming ASR service.
     - Streams 16kHz mono PCM from the WebSocket client.
-    - Calls the provided async callback(text, is_final, sentiment) on each transcript.
+    - Calls the provided async callback(text: str, is_final: bool) on each transcript.
     """
 
     def __init__(self, callback):
-        # callback: async function(text: str, is_final: bool, sentiment: Optional[str])
+        # callback: async function(text: str, is_final: bool)
         self.api_key: Optional[str] = os.getenv("DEEPGRAM_API_KEY")
         if not self.api_key:
             print("ERROR: DEEPGRAM_API_KEY is missing in .env")
-
         self.callback = callback
         self.connection = None
 
     async def start(self):
         """
-        Connect to Deepgram Live and start receiving transcripts
-        with sentiment analysis enabled.
+        Connect to Deepgram Live and start receiving transcripts.
         """
         config = DeepgramClientOptions(options={"keepalive": "true"})
         deepgram = DeepgramClient(self.api_key, config)
@@ -48,7 +45,7 @@ class ASRService:
             self._on_message,
         )
 
-        # IMPORTANT: enable sentiment analysis here
+        # IMPORTANT: no sentiment flag here — only core ASR options
         options = LiveOptions(
             model="nova-2",
             language="en-US",
@@ -57,17 +54,15 @@ class ASRService:
             encoding="linear16",
             sample_rate=16000,
             channels=1,
-            analyze_sentiment=True,  # <--- this turns sentiment ON
         )
 
         await self.connection.start(options)
-        print("✓ Deepgram Live ASR connected with sentiment")
+        print("✓ Deepgram Live ASR connected")
 
     async def _on_message(self, result, **kwargs):
         """
         Handler for incoming Deepgram transcripts.
-        Extracts text, final flag, and sentiment label.
-        Calls self.callback(text, is_final, sentiment).
+        Extracts text and final flag, then calls self.callback.
         """
         if not result.channel.alternatives:
             return
@@ -79,25 +74,10 @@ class ASRService:
 
         is_final = result.is_final
 
-        # Default if sentiment not present
-        sentiment: Optional[str] = None
-
-        # Deepgram returns sentiment in 'sentiment' or 'sentiments' on the alternative
-        # depending on SDK/version. We check both patterns defensively.
-        if hasattr(alt, "sentiment") and alt.sentiment:
-            # alt.sentiment is usually a single label: "positive" / "negative" / "neutral"
-            sentiment = alt.sentiment
-        elif hasattr(alt, "sentiments") and alt.sentiments:
-            # Sometimes it's a list of {label, confidence}; pick highest confidence
-            best = max(alt.sentiments, key=lambda s: getattr(s, "confidence", 0.0))
-            sentiment = getattr(best, "label", None)
-
-        print(
-            f"📝 Heard: '{sentence}' (final={is_final}, sentiment={sentiment})"
-        )
+        print(f"📝 Heard: '{sentence}' (final={is_final})")
 
         # Forward to main logic
-        await self.callback(sentence, is_final, sentiment)
+        await self.callback(sentence, is_final)
 
     async def send_audio(self, audio_chunk: bytes):
         """
