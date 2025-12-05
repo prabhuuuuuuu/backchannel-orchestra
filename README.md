@@ -1,3 +1,5 @@
+![Logo](assets/logo.png)
+
 # Backchannel Orchestra
 
 > **An AI-powered live audience** that reacts in real-time while you practice presentations — cheers, mm-hmms, laughs, or even heckles you!
