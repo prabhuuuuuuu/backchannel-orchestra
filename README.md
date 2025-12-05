@@ -11,7 +11,8 @@
 [![Deepgram](https://img.shields.io/badge/ASR-Deepgram_Nova--2-green)](https://deepgram.com/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-teal)](https://fastapi.tiangolo.com/)
 
-[Watch Demo Video](#) | [Live Web App](#) (coming soon)
+[Watch Demo Video](https://youtu.be/W3jOFd0L278)
+
 
 **Built using Murf Falcon – the consistently fastest TTS API.**
 
