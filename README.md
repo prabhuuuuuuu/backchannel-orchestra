@@ -1,4 +1,7 @@
-![Logo](assets/logo_png.png)
+<p align="left">
+  <img src="assets/logo_png.png" alt="Logo" width="120">
+</p>
+
 
 # Backchannel Orchestra
 
