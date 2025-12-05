@@ -32,8 +32,8 @@ export default function LandingPage() {
     {/* Logo */}
     <Link href="/" className="flex items-center gap-2 group">
       <div className="relative">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-xl shadow-yellow-500/40 group-hover:scale-110 transition-all duration-300">
-          <span className="text-black font-black text-lg tracking-tighter">B</span>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-xl shadow-yellow-500/40 group-hover:scale-110 transition-all duration-300">
+          <img src="/logo.png" alt="" />
         </div>
         <div className="absolute inset-0 rounded-lg bg-yellow-400 blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
       </div>
