@@ -42,12 +42,12 @@ export default function LandingPage() {
 
     {/* Buttons */}
     <div className="flex items-center gap-3">
-      <Button className="text-black text-sm px-3 py-1.5">
+      {/* <Button className="text-black text-sm px-3 py-1.5">
         Sign In
       </Button>
       <Button className="bg-yellow-500 hover:bg-yellow-400 text-black font-medium text-sm px-3 py-1.5">
         Get Started
-      </Button>
+      </Button> */}
     </div>
 
   </div>
@@ -63,7 +63,7 @@ export default function LandingPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400"></span>
               </span>
-              Early Access — Join the Waitlist
+              Backchannel Orchestra
             </div>
 
             {/* Headline */}
@@ -102,7 +102,7 @@ export default function LandingPage() {
 
             {/* Trust line */}
             <p className="text-sm text-gray-500 pt-8">
-              Trusted by speakers at <span className="text-yellow-400 font-medium">TED, Google, Stripe, YC</span>
+              {/* Trusted by speakers at <span className="text-yellow-400 font-medium">TED, Google, Stripe, YC</span> */}
             </p>
           </div>
 
